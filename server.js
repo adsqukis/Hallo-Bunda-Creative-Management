@@ -13,6 +13,7 @@ import platformsRouter from './routes/platforms.js';
 import targetsRouter from './routes/targets.js';
 import reportsRouter from './routes/reports.js';
 import overviewRouter from './routes/overview.js';
+import seedRouter from './routes/seed.js';
 import { requireAuth } from './middleware/auth.js';
 import { seedUsers } from './seed.js';
 
@@ -47,6 +48,7 @@ app.use('/api/platforms', requireAuth, platformsRouter);
 app.use('/api/targets', requireAuth, targetsRouter);
 app.use('/api/reports', requireAuth, reportsRouter);
 app.use('/api/overview', requireAuth, overviewRouter);
+app.use('/api/seed', seedRouter);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Endpoint tidak ditemukan' });
