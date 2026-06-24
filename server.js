@@ -13,6 +13,7 @@ import platformsRouter from './routes/platforms.js';
 import targetsRouter from './routes/targets.js';
 import reportsRouter from './routes/reports.js';
 import overviewRouter from './routes/overview.js';
+import kpiComparisonRouter from './routes/kpiComparison.js';
 import { requireAuth } from './middleware/auth.js';
 import { seedUsers } from './seed.js';
 
@@ -42,6 +43,7 @@ app.use('/api/calendar', requireAuth, calendarRouter);
 app.use('/api/requests', requireAuth, requestsRouter);
 app.use('/api/brief', requireAuth, briefRouter);
 app.use('/api/analytics', requireAuth, analyticsRouter);
+app.use('/api/kpi-comparison', requireAuth, kpiComparisonRouter);
 app.use('/api/users', usersRouter);
 app.use('/api/platforms', requireAuth, platformsRouter);
 app.use('/api/targets', requireAuth, targetsRouter);
