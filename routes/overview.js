@@ -22,7 +22,7 @@ router.get('/', async (req, res) => {
     const perPlatform = await pool.query(
       `SELECT p.id, p.name, p.slug, p.icon,
         COUNT(r.id) as report_count,
-        jsonb_object_agg(rm.metric_key, rm.total) as metrics_agg
+        COALESCE(jsonb_object_agg(rm.metric_key, rm.total) FILTER (WHERE rm.metric_key IS NOT NULL), '{}'::jsonb) as metrics_agg
        FROM platforms p
        LEFT JOIN reports r ON r.platform_id = p.id AND r.report_date >= $1 AND r.report_date <= $2
        LEFT JOIN (
