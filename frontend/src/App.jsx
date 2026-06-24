@@ -3,6 +3,7 @@ import Monitoring from './pages/Monitoring.jsx'
 import Calendar from './pages/Calendar.jsx'
 import Evaluation from './pages/Evaluation.jsx'
 import Requests from './pages/Requests.jsx'
+import KPI from './pages/KPI.jsx'
 import ManageUsers from './pages/ManageUsers.jsx'
 import Login from './pages/Login.jsx'
 
@@ -37,14 +38,23 @@ function ProtectedShell() {
             </NavLink>
           ))}
           {isAdmin && (
-            <NavLink
-              to="/users"
-              className={({ isActive }) => `sidebar-link${isActive ? ' active' : ''}`}
-              style={{ marginTop: 16, borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 16 }}
-            >
-              <span className="sidebar-dot" style={{ opacity: 0.8 }} />
-              Manajemen User
-            </NavLink>
+            <>
+              <NavLink
+                to="/kpi"
+                className={({ isActive }) => `sidebar-link${isActive ? ' active' : ''}`}
+                style={{ marginTop: 16, borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 16 }}
+              >
+                <span className="sidebar-dot" style={{ opacity: 0.8 }} />
+                KPI
+              </NavLink>
+              <NavLink
+                to="/users"
+                className={({ isActive }) => `sidebar-link${isActive ? ' active' : ''}`}
+              >
+                <span className="sidebar-dot" style={{ opacity: 0.8 }} />
+                Manajemen User
+              </NavLink>
+            </>
           )}
         </nav>
         <div style={{ marginTop: 'auto', fontSize: 11, color: '#8A887F', marginBottom: 8, fontFamily: 'IBM Plex Mono, monospace' }}>
@@ -65,6 +75,7 @@ function ProtectedShell() {
           <Route path="/kalender" element={<Calendar />} />
           <Route path="/evaluasi" element={<Evaluation />} />
           <Route path="/permintaan" element={<Requests />} />
+          {isAdmin && <Route path="/kpi" element={<KPI />} />}
           {isAdmin && <Route path="/users" element={<ManageUsers />} />}
         </Routes>
       </main>
