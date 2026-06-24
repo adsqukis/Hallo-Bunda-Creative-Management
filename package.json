@@ -19,5 +19,16 @@
   },
   "devDependencies": {
     "nodemon": "^3.0.1"
-  }
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/adsqukis/Hallo-Bunda-Creative-Management.git"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/adsqukis/Hallo-Bunda-Creative-Management/issues"
+  },
+  "homepage": "https://github.com/adsqukis/Hallo-Bunda-Creative-Management#readme"
 }
