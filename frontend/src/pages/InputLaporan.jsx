@@ -8,6 +8,7 @@ export default function InputLaporan() {
   const [formValues, setFormValues] = useState({})
   const [reportDate, setReportDate] = useState(new Date().toISOString().slice(0, 10))
   const [notes, setNotes] = useState('')
+  const [topContents, setTopContents] = useState([{ title: '', metric_key: '', metric_value: '' }])
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
@@ -28,6 +29,7 @@ export default function InputLaporan() {
     const p = platforms.find(pl => pl.slug === selectedPlatform)
     setMetrics(p?.metrics || [])
     setFormValues({})
+    setTopContents([{ title: '', metric_key: '', metric_value: '' }])
 
     // Load recent reports for this platform
     api.get('/reports', { params: { platform: selectedPlatform, limit: 5 } })
@@ -37,6 +39,21 @@ export default function InputLaporan() {
 
   function handleChange(key, value) {
     setFormValues(prev => ({ ...prev, [key]: value }))
+  }
+
+  function handleTopChange(index, field, value) {
+    const updated = [...topContents]
+    updated[index] = { ...updated[index], [field]: value }
+    setTopContents(updated)
+  }
+
+  function addTopRow() {
+    setTopContents(prev => [...prev, { title: '', metric_key: '', metric_value: '' }])
+  }
+
+  function removeTopRow(index) {
+    if (topContents.length <= 1) return
+    setTopContents(prev => prev.filter((_, i) => i !== index))
   }
 
   async function handleSubmit(e) {
@@ -53,11 +70,13 @@ export default function InputLaporan() {
         platform_id: p.id,
         report_date: reportDate,
         metrics: formValues,
-        notes
+        notes,
+        top_contents: topContents.filter(tc => tc.title && tc.metric_key && tc.metric_value)
       })
       setSuccess('Laporan berhasil disimpan!')
       setFormValues({})
       setNotes('')
+      setTopContents([{ title: '', metric_key: '', metric_value: '' }])
 
       // Refresh recent reports
       const res = await api.get('/reports', { params: { platform: selectedPlatform, limit: 5 } })
@@ -114,6 +133,51 @@ export default function InputLaporan() {
                   />
                 </div>
               ))}
+            </div>
+          </div>
+
+          {/* Top Content */}
+          <div className="card" style={{ marginBottom: 16, padding: 14, background: '#FAFAF8', border: '1px solid var(--border)' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 10 }}>
+              <label style={{ margin: 0, fontWeight: 600, fontSize: 13 }}>🏆 Top Content (opsional)</label>
+              <button type="button" className="btn" onClick={addTopRow} style={{ fontSize: 11, padding: '4px 10px' }}>
+                + Tambah
+              </button>
+            </div>
+            {topContents.map((tc, i) => (
+              <div key={i} style={{ display: 'flex', gap: 8, marginBottom: 8, alignItems: 'center' }}>
+                <input
+                  placeholder="Judul konten"
+                  value={tc.title}
+                  onChange={e => handleTopChange(i, 'title', e.target.value)}
+                  style={{ flex: 2, fontSize: 12, padding: '6px 10px' }}
+                />
+                <select
+                  value={tc.metric_key}
+                  onChange={e => handleTopChange(i, 'metric_key', e.target.value)}
+                  style={{ flex: 1, fontSize: 12, padding: '6px 10px' }}
+                >
+                  <option value="">Pilih metrik</option>
+                  {metrics.map(m => (
+                    <option key={m.metric_key} value={m.metric_key}>{m.metric_label}</option>
+                  ))}
+                </select>
+                <input
+                  type="number"
+                  placeholder="Nilai"
+                  value={tc.metric_value}
+                  onChange={e => handleTopChange(i, 'metric_value', e.target.value)}
+                  style={{ flex: 0.6, fontSize: 12, padding: '6px 10px' }}
+                />
+                {topContents.length > 1 && (
+                  <button type="button" onClick={() => removeTopRow(i)} style={{
+                    background: 'none', border: 'none', cursor: 'pointer', fontSize: 16, color: '#B91C1C', padding: '4px 6px'
+                  }}>×</button>
+                )}
+              </div>
+            ))}
+            <div style={{ fontSize: 11, color: 'var(--muted)', marginTop: 4 }}>
+              Konten dengan performa terbaik di platform ini. Akan muncul di Overview.
             </div>
           </div>
 

@@ -46,9 +46,9 @@ router.get('/', async (req, res) => {
   }
 });
 
-// POST /api/reports — create report with metrics
+// POST /api/reports — create report with metrics + optional top content
 router.post('/', async (req, res) => {
-  const { platform_id, report_date, metrics, notes } = req.body;
+  const { platform_id, report_date, metrics, notes, top_contents } = req.body;
   if (!platform_id || !report_date || !metrics) {
     return res.status(400).json({ error: 'Platform, tanggal, dan metrics wajib diisi' });
   }
@@ -68,6 +68,24 @@ router.post('/', async (req, res) => {
           'INSERT INTO report_metrics (report_id, metric_key, value) VALUES ($1, $2, $3)',
           [reportId, key, parseFloat(value)]
         );
+      }
+    }
+
+    // Save top content jika ada
+    if (top_contents && Array.isArray(top_contents) && top_contents.length > 0) {
+      // Hapus top content lama untuk platform + tanggal ini (avoid duplicate)
+      await client.query(
+        'DELETE FROM top_contents WHERE platform_id = $1 AND report_date = $2',
+        [platform_id, report_date]
+      );
+      for (const tc of top_contents) {
+        if (tc.title && tc.metric_key && tc.metric_value) {
+          await client.query(
+            `INSERT INTO top_contents (platform_id, title, url, metric_key, metric_value, report_date)
+             VALUES ($1, $2, $3, $4, $5, $6)`,
+            [platform_id, tc.title, tc.url || '', tc.metric_key, parseFloat(tc.metric_value), report_date]
+          );
+        }
       }
     }
 

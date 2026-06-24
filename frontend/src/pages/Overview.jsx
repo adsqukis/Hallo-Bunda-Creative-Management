@@ -20,6 +20,51 @@ const PLATFORM_COLORS = {
   website: '#2563EB', threads: '#000000'
 }
 
+const METRIC_LABELS = {
+  instagram: [
+    { key: 'reach', label: 'Reach' },
+    { key: 'impressions', label: 'Impressions' },
+    { key: 'likes', label: 'Likes' },
+    { key: 'comments', label: 'Comments' },
+    { key: 'shares', label: 'Saves & Shares' },
+    { key: 'profile_visits', label: 'Profile Visits' },
+    { key: 'follower_growth', label: 'Follower Growth' },
+  ],
+  tiktok: [
+    { key: 'views', label: 'Views' },
+    { key: 'completion_rate', label: 'Completion Rate' },
+    { key: 'likes', label: 'Likes' },
+    { key: 'comments', label: 'Comments' },
+    { key: 'shares', label: 'Shares' },
+    { key: 'engagement_rate', label: 'Engagement Rate' },
+  ],
+  youtube: [
+    { key: 'views', label: 'Views' },
+    { key: 'watch_time', label: 'Watch Time (jam)' },
+    { key: 'avg_duration', label: 'Avg Duration (detik)' },
+    { key: 'subscriber_growth', label: 'Subscriber Growth' },
+    { key: 'ctr', label: 'CTR (%)' },
+    { key: 'likes', label: 'Likes' },
+    { key: 'comments', label: 'Comments' },
+  ],
+  website: [
+    { key: 'organic_traffic', label: 'Organic Traffic' },
+    { key: 'bounce_rate', label: 'Bounce Rate (%)' },
+    { key: 'conversion_rate', label: 'Conversion Rate (%)' },
+    { key: 'avg_time_on_page', label: 'Avg Time (detik)' },
+    { key: 'likes', label: 'Likes' },
+    { key: 'comments', label: 'Comments' },
+  ],
+  threads: [
+    { key: 'replies_rate', label: 'Replies Rate' },
+    { key: 'reposts', label: 'Reposts' },
+    { key: 'follower_growth', label: 'Follower Growth' },
+    { key: 'likes', label: 'Likes' },
+    { key: 'comments', label: 'Comments' },
+    { key: 'engagement_rate', label: 'Engagement Rate (%)' },
+  ],
+}
+
 export default function Overview() {
   const [from, setFrom] = useState(last7days().from)
   const [to, setTo] = useState(last7days().to)
@@ -105,9 +150,16 @@ export default function Overview() {
               >
                 <div style={{ fontWeight: 700, fontSize: 15, marginBottom: 12, color }}>{p.icon} {p.name}</div>
 
-                {/* KPI values */}
+                {/* KPI values — SEMUA metrik dengan label proper */}
                 <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 6, marginBottom: 12 }}>
-                  {mKeys.slice(0, 6).map(k => (
+                  {METRIC_LABELS[p.slug] && METRIC_LABELS[p.slug].filter(lbl => m[lbl.key] !== undefined).map(lbl => (
+                    <div key={lbl.key} style={{ fontSize: 12 }}>
+                      <span style={{ color: 'var(--muted)' }}>{lbl.label}: </span>
+                      <strong>{Number(m[lbl.key]).toLocaleString('id-ID')}</strong>
+                    </div>
+                  ))}
+                  {/* Fallback untuk key yang gak terdaftar di METRIC_LABELS */}
+                  {(!METRIC_LABELS[p.slug]) && mKeys.map(k => (
                     <div key={k} style={{ fontSize: 12 }}>
                       <span style={{ color: 'var(--muted)' }}>{k.replace(/_/g, ' ')}: </span>
                       <strong>{Number(m[k]).toLocaleString('id-ID')}</strong>
