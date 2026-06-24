@@ -5,7 +5,7 @@ const router = Router();
 
 // GET /api/analytics/kpi-comparison?month=6&year=2026
 // Bandingkan target (kpi_targets) vs capaian (reports/report_metrics) per platform
-router.get('/kpi-comparison', async (req, res) => {
+router.get('/', async (req, res) => {
   try {
     const month = parseInt(req.query.month) || new Date().getMonth() + 1;
     const year = parseInt(req.query.year) || new Date().getFullYear();
