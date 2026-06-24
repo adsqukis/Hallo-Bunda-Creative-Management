@@ -8,15 +8,17 @@ import requestsRouter from './routes/requests.js';
 import briefRouter from './routes/brief.js';
 import analyticsRouter from './routes/analytics.js';
 import authRouter from './routes/auth.js';
+import usersRouter from './routes/users.js';
 import { requireAuth } from './middleware/auth.js';
+import { seedUsers } from './seed.js';
 
 dotenv.config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-if (!process.env.JWT_SECRET || !process.env.APP_PASSWORD) {
-  console.error('JWT_SECRET dan APP_PASSWORD wajib diisi di .env sebelum server dijalankan.');
+if (!process.env.JWT_SECRET) {
+  console.error('JWT_SECRET wajib diisi di .env sebelum server dijalankan.');
   process.exit(1);
 }
 
@@ -36,6 +38,7 @@ app.use('/api/calendar', requireAuth, calendarRouter);
 app.use('/api/requests', requireAuth, requestsRouter);
 app.use('/api/brief', requireAuth, briefRouter);
 app.use('/api/analytics', requireAuth, analyticsRouter);
+app.use('/api/users', usersRouter);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Endpoint tidak ditemukan' });
@@ -46,6 +49,7 @@ app.use((err, req, res, next) => {
   res.status(500).json({ error: 'Terjadi kesalahan server' });
 });
 
-app.listen(PORT, () => {
+app.listen(PORT, async () => {
   console.log(`Server berjalan di port ${PORT}`);
+  await seedUsers();
 });

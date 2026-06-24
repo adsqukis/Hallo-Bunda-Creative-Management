@@ -53,3 +53,16 @@ CREATE INDEX IF NOT EXISTS idx_posts_platform ON posts(platform);
 CREATE INDEX IF NOT EXISTS idx_posts_input_week ON posts(input_week);
 CREATE INDEX IF NOT EXISTS idx_calendar_scheduled_date ON calendar_content(scheduled_date);
 CREATE INDEX IF NOT EXISTS idx_requests_status ON content_requests(status);
+
+-- ============================================================
+-- User Management (ditambahkan 24 Jun 2026)
+-- ============================================================
+CREATE TABLE IF NOT EXISTS users (
+  id SERIAL PRIMARY KEY,
+  username VARCHAR(50) UNIQUE NOT NULL,
+  password VARCHAR(255) NOT NULL,
+  role VARCHAR(10) NOT NULL DEFAULT 'member' CHECK (role IN ('admin', 'member')),
+  created_by VARCHAR(50),
+  created_at TIMESTAMP DEFAULT NOW(),
+  updated_at TIMESTAMP DEFAULT NOW()
+);

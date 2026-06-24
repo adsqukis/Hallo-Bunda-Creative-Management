@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom'
 import { api } from '../api/client.js'
 
 export default function Login() {
+  const [username, setUsername] = useState('')
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -13,8 +14,9 @@ export default function Login() {
     setLoading(true)
     setError('')
     try {
-      const res = await api.post('/auth/login', { password })
+      const res = await api.post('/auth/login', { username, password })
       localStorage.setItem('hb_token', res.data.token)
+      localStorage.setItem('hb_user', JSON.stringify({ username: res.data.username, role: res.data.role }))
       navigate('/monitoring')
     } catch (err) {
       setError(err.response?.data?.error || 'Gagal login')
@@ -37,10 +39,20 @@ export default function Login() {
         {error && <div style={{ color: '#B91C1C', fontSize: 13, marginBottom: 12 }}>{error}</div>}
 
         <div className="field">
-          <label>Password Tim</label>
+          <label>Username</label>
+          <input
+            type="text"
+            autoFocus
+            value={username}
+            onChange={e => setUsername(e.target.value)}
+            placeholder="Masukkan username"
+          />
+        </div>
+
+        <div className="field">
+          <label>Password</label>
           <input
             type="password"
-            autoFocus
             value={password}
             onChange={e => setPassword(e.target.value)}
             placeholder="Masukkan password"

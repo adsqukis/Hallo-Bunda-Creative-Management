@@ -1,7 +1,6 @@
 import jwt from 'jsonwebtoken';
 
-// Middleware untuk verifikasi token JWT di setiap request ke data API.
-// Tim internal pakai satu shared password (lihat routes/auth.js), bukan akun per-user.
+// Middleware untuk verifikasi token JWT
 export function requireAuth(req, res, next) {
   const header = req.headers.authorization || '';
   const token = header.startsWith('Bearer ') ? header.slice(7) : null;
@@ -11,9 +10,18 @@ export function requireAuth(req, res, next) {
   }
 
   try {
-    jwt.verify(token, process.env.JWT_SECRET);
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    req.user = decoded; // { userId, username, role }
     next();
   } catch (err) {
     return res.status(401).json({ error: 'Sesi habis atau token tidak valid. Login ulang.' });
   }
+}
+
+// Middleware untuk memastikan role admin
+export function requireAdmin(req, res, next) {
+  if (!req.user || req.user.role !== 'admin') {
+    return res.status(403).json({ error: 'Akses ditolak. Hanya admin yang bisa mengakses.' });
+  }
+  next();
 }
