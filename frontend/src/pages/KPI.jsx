@@ -3,76 +3,154 @@ import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContaine
 import { api, getISOWeek } from '../api/client.js'
 import { useNavigate } from 'react-router-dom'
 
-const PLATFORM_COLORS = {
-  instagram: '#C13584',
-  tiktok: '#010101',
-  youtube: '#FF0000',
-  website: '#2563EB',
-  threads: '#000000'
+const PLATFORM_META = {
+  instagram: {
+    color: '#C13584',
+    label: 'Instagram',
+    focus: 'Estetika & Pertumbuhan Komunitas',
+    metrics: [
+      { key: 'total_reach', label: 'Reach', desc: 'Akun unik yang melihat konten', unit: '', available: true },
+      { key: 'total_impressions', label: 'Impressions', desc: 'Total penayangan konten', unit: '', available: true },
+      { key: 'engagement_rate', label: 'Engagement Rate', desc: 'Likes & Comments / Views', unit: '%', available: true },
+      { key: 'total_likes', label: 'Likes', desc: 'Jumlah suka', unit: '', available: true },
+      { key: 'total_comments', label: 'Comments', desc: 'Jumlah komentar', unit: '', available: true },
+      { key: 'total_shares', label: 'Saves & Shares', desc: 'Kualitas & nilai manfaat konten', unit: '', available: true },
+      { key: 'profile_visits', label: 'Profile Visits', desc: 'Kunjungan profil', unit: '', available: false },
+      { key: 'follower_growth', label: 'Follower Growth Rate', desc: 'Laju pertumbuhan pengikut', unit: '%', available: false },
+    ]
+  },
+  tiktok: {
+    color: '#010101',
+    label: 'TikTok',
+    focus: 'Viralitas & Hiburan',
+    metrics: [
+      { key: 'total_views', label: 'Video Views', desc: 'Jumlah pemutaran video', unit: '', available: true },
+      { key: 'completion_rate', label: 'Completion Rate', desc: 'Audiens menonton sampai selesai', unit: '%', available: false },
+      { key: 'engagement_rate', label: 'Engagement Rate', desc: 'Like + Comment + Share / Views', unit: '%', available: true },
+      { key: 'total_shares', label: 'Share Rate', desc: 'Tingkat pembagian konten', unit: '', available: true },
+      { key: 'total_likes', label: 'Likes', desc: 'Jumlah suka', unit: '', available: true },
+      { key: 'total_comments', label: 'Comments', desc: 'Jumlah komentar', unit: '', available: true },
+    ]
+  },
+  youtube: {
+    color: '#FF0000',
+    label: 'YouTube',
+    focus: 'Retensi & Edukasi',
+    metrics: [
+      { key: 'total_views', label: 'View Count', desc: 'Jumlah tayangan video', unit: '', available: true },
+      { key: 'watch_time', label: 'Watch Time', desc: 'Total waktu penonton', unit: 'jam', available: false },
+      { key: 'avg_duration', label: 'Avg View Duration', desc: 'Durasi rata-rata menonton', unit: 'detik', available: false },
+      { key: 'follower_growth', label: 'Subscriber Growth', desc: 'Laju pertumbuhan pelanggan', unit: '%', available: false },
+      { key: 'ctr', label: 'CTR', desc: 'Klik setelah melihat thumbnail', unit: '%', available: false },
+      { key: 'total_likes', label: 'Likes', desc: 'Jumlah suka', unit: '', available: true },
+      { key: 'total_comments', label: 'Comments', desc: 'Jumlah komentar', unit: '', available: true },
+    ]
+  },
+  website: {
+    color: '#2563EB',
+    label: 'Website',
+    focus: 'Konversi & Otoritas',
+    metrics: [
+      { key: 'total_views', label: 'Organic Traffic', desc: 'Pengunjung alami dari mesin pencari', unit: '', available: true },
+      { key: 'bounce_rate', label: 'Bounce Rate', desc: 'Pengunjung langsung keluar', unit: '%', available: false },
+      { key: 'conversion_rate', label: 'Conversion Rate', desc: 'Tindakan spesifik (form, download, beli)', unit: '%', available: false },
+      { key: 'avg_views', label: 'Avg Time on Page', desc: 'Rata-rata waktu baca artikel/halaman', unit: 'detik', available: false },
+      { key: 'total_likes', label: 'Likes', desc: 'Reaksi', unit: '', available: true },
+      { key: 'total_comments', label: 'Comments', desc: 'Komentar', unit: '', available: true },
+    ]
+  },
+  threads: {
+    color: '#000000',
+    label: 'Threads',
+    focus: 'Percakapan & Hubungan',
+    metrics: [
+      { key: 'replies_rate', label: 'Replies Rate', desc: 'Balasan langsung pada thread', unit: '', available: false },
+      { key: 'total_shares', label: 'Reposts / Quotes', desc: 'Audiens membagikan ulang thread', unit: '', available: true },
+      { key: 'follower_growth', label: 'Followers Growth', desc: 'Laju pengikut baru', unit: '%', available: false },
+      { key: 'engagement_rate', label: 'Engagement Rate', desc: 'Interaksi aktif per thread', unit: '%', available: true },
+      { key: 'total_likes', label: 'Likes', desc: 'Jumlah suka', unit: '', available: true },
+      { key: 'total_comments', label: 'Replies', desc: 'Jumlah balasan', unit: '', available: true },
+    ]
+  }
 }
 
 const PLATFORM_ORDER = ['instagram', 'tiktok', 'youtube', 'website', 'threads']
 
-function MetricCard({ label, value, sub, goodUp = true }) {
-  const isUp = value > 0
-  const isDown = value < 0
-  const color = value === 0 ? 'var(--muted)' : isUp ? (goodUp ? 'var(--good)' : '#B91C1C') : (goodUp ? '#B91C1C' : 'var(--good)')
+function KpiRow({ data, platformMeta }) {
+  const color = platformMeta.color
+  const plData = data
 
-  return (
-    <div className="card" style={{ textAlign: 'center', padding: '16px 12px' }}>
-      <div style={{ fontSize: 11, color: 'var(--muted)', fontWeight: 600, marginBottom: 4, textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-        {label}
-      </div>
-      <div style={{ fontSize: 22, fontWeight: 700, fontFamily: 'var(--font-mono)' }}>
-        {value}
-      </div>
-      {sub !== undefined && sub !== null && (
-        <div style={{ fontSize: 13, fontWeight: 600, color, marginTop: 2 }}>
-          {isUp ? '↑' : isDown ? '↓' : ''} {Math.abs(sub)}%
-        </div>
-      )}
-    </div>
-  )
-}
-
-function PlatformCard({ data }) {
-  const navigate = useNavigate()
-  const color = PLATFORM_COLORS[data.platform] || '#666'
-
-  if (!data.has_data) {
-    return (
-      <div className="card" style={{ borderLeft: `4px solid ${color}`, opacity: 0.5 }}>
-        <div style={{ fontWeight: 600, fontSize: 14, marginBottom: 8, color }}>{data.label}</div>
-        <div style={{ color: 'var(--muted)', fontSize: 13 }}>Belum ada data minggu ini</div>
-      </div>
-    )
+  function getValue(key) {
+    switch (key) {
+      case 'total_views': return plData?.total_views?.toLocaleString('id-ID') || 0
+      case 'total_likes': return plData?.total_likes?.toLocaleString('id-ID') || 0
+      case 'total_comments': return plData?.total_comments?.toLocaleString('id-ID') || 0
+      case 'total_shares': return plData?.total_shares?.toLocaleString('id-ID') || 0
+      case 'total_reach': return plData?.total_reach?.toLocaleString('id-ID') || 0
+      case 'total_impressions': return plData?.total_impressions?.toLocaleString('id-ID') || 0
+      case 'engagement_rate': return plData?.engagement_rate ? `${plData.engagement_rate}%` : '—'
+      case 'avg_views': return plData?.avg_views?.toLocaleString('id-ID') || 0
+      case 'follower_growth': return '—'
+      case 'profile_visits': return '—'
+      case 'completion_rate': return '—'
+      case 'watch_time': return '—'
+      case 'avg_duration': return '—'
+      case 'ctr': return '—'
+      case 'bounce_rate': return '—'
+      case 'conversion_rate': return '—'
+      case 'replies_rate': return '—'
+      default: return '—'
+    }
   }
 
   return (
-    <div className="card" style={{ borderLeft: `4px solid ${color}` }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 16 }}>
-        <div style={{ fontWeight: 600, fontSize: 14, color }}>{data.label}</div>
-        <button
-          className="btn"
-          style={{ fontSize: 11, padding: '4px 10px' }}
-          onClick={() => navigate('/evaluasi')}
-        >
-          Detail
-        </button>
+    <div className="card" style={{ borderLeft: `4px solid ${color}`, marginBottom: 16 }}>
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 12 }}>
+        <div>
+          <span style={{ fontWeight: 700, fontSize: 15, color }}>{platformMeta.label}</span>
+          <span style={{ fontSize: 11, color: 'var(--muted)', marginLeft: 8, fontFamily: 'var(--font-mono)' }}>
+            {platformMeta.focus}
+          </span>
+        </div>
+        {plData?.views_growth !== 0 && plData?.has_data && (
+          <span style={{
+            fontSize: 12, fontWeight: 600,
+            color: plData.views_growth > 0 ? 'var(--good)' : '#B91C1C'
+          }}>
+            {plData.views_growth > 0 ? '↑' : '↓'} {Math.abs(plData.views_growth)}% vs prev week
+          </span>
+        )}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 8, marginBottom: 12 }}>
-        <MetricCard label="Views" value={data.total_views.toLocaleString('id-ID')} sub={data.views_growth} />
-        <MetricCard label="Engagement" value={data.total_engagement.toLocaleString('id-ID')} />
-        <MetricCard label="ER" value={`${data.engagement_rate}%`} />
-      </div>
-
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 8, fontSize: 12, color: 'var(--muted)' }}>
-        <div>Posts: <strong>{data.posts}</strong></div>
-        <div>Avg Views/Post: <strong>{data.avg_views.toLocaleString('id-ID')}</strong></div>
-        <div>Avg Engagement/Post: <strong>{data.avg_engagement}</strong></div>
-        {data.reach_rate > 0 && <div>Reach Rate: <strong>{data.reach_rate}%</strong></div>}
-      </div>
+      <table>
+        <thead>
+          <tr>
+            <th style={{ width: '30%' }}>Metrik</th>
+            <th style={{ width: '20%' }}>Nilai</th>
+            <th style={{ width: '50%' }}>Keterangan</th>
+          </tr>
+        </thead>
+        <tbody>
+          {platformMeta.metrics.map(m => {
+            const val = getValue(m.key)
+            const isAvailable = m.available && plData?.has_data
+            const hasValue = val !== '—' && val !== 0 && val !== '0'
+            return (
+              <tr key={m.key} style={{ opacity: isAvailable && hasValue ? 1 : 0.45 }}>
+                <td style={{ fontWeight: 600, fontSize: 13 }}>{m.label}</td>
+                <td className="metric" style={{ fontSize: 14 }}>
+                  {isAvailable && hasValue ? val : '—'}
+                </td>
+                <td style={{ fontSize: 12, color: 'var(--muted)' }}>
+                  {m.desc}
+                  {!isAvailable && <span style={{ color: '#C4781F', marginLeft: 6 }}>· perlu integrasi data</span>}
+                  {isAvailable && !hasValue && <span style={{ color: 'var(--muted)', marginLeft: 6 }}>· belum ada data minggu ini</span>}
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
     </div>
   )
 }
@@ -98,9 +176,11 @@ export default function KPI() {
   useEffect(() => { loadKPI() }, [week])
 
   const platformsWithData = kpiData?.platforms?.filter(p => p.has_data) || []
-  const platformsEmpty = kpiData?.platforms?.filter(p => !p.has_data) || []
+  const totalViews = platformsWithData.reduce((s, p) => s + p.total_views, 0)
+  const totalEngagement = platformsWithData.reduce((s, p) => s + p.total_engagement, 0)
+  const overallER = totalViews > 0 ? ((totalEngagement / totalViews) * 100).toFixed(2) : '0.00'
 
-  // Data untuk chart perbandingan
+  // Chart data per platform
   const chartData = kpiData?.platforms
     ?.filter(p => p.has_data)
     .map(p => ({
@@ -108,10 +188,6 @@ export default function KPI() {
       Views: p.total_views,
       Engagement: p.total_engagement
     })) || []
-
-  const totalViews = platformsWithData.reduce((s, p) => s + p.total_views, 0)
-  const totalEngagement = platformsWithData.reduce((s, p) => s + p.total_engagement, 0)
-  const overallER = totalViews > 0 ? ((totalEngagement / totalViews) * 100).toFixed(2) : '0.00'
 
   return (
     <div>
@@ -128,37 +204,46 @@ export default function KPI() {
         </div>
       </div>
 
-      {/* Overall KPI Summary */}
+      {/* Ringkasan */}
       {!loading && kpiData && (
         <div className="card" style={{ marginBottom: 24 }}>
           <div className="page-eyebrow" style={{ marginBottom: 12 }}>Ringkasan · {week}</div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
-            <MetricCard label="Total Views" value={totalViews.toLocaleString('id-ID')} />
-            <MetricCard label="Total Engagement" value={totalEngagement.toLocaleString('id-ID')} />
-            <MetricCard label="Overall ER" value={`${overallER}%`} />
-            <MetricCard label="Platform Aktif" value={platformsWithData.length} />
+            <div className="card" style={{ textAlign: 'center', padding: '16px 12px' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted)', marginBottom: 4, textTransform: 'uppercase' }}>Total Views</div>
+              <div style={{ fontSize: 22, fontWeight: 700, fontFamily: 'var(--font-mono)' }}>{totalViews.toLocaleString('id-ID')}</div>
+            </div>
+            <div className="card" style={{ textAlign: 'center', padding: '16px 12px' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted)', marginBottom: 4, textTransform: 'uppercase' }}>Total Engagement</div>
+              <div style={{ fontSize: 22, fontWeight: 700, fontFamily: 'var(--font-mono)' }}>{totalEngagement.toLocaleString('id-ID')}</div>
+            </div>
+            <div className="card" style={{ textAlign: 'center', padding: '16px 12px' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted)', marginBottom: 4, textTransform: 'uppercase' }}>Overall ER</div>
+              <div style={{ fontSize: 22, fontWeight: 700, fontFamily: 'var(--font-mono)' }}>{overallER}%</div>
+            </div>
+            <div className="card" style={{ textAlign: 'center', padding: '16px 12px' }}>
+              <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted)', marginBottom: 4, textTransform: 'uppercase' }}>Platform Aktif</div>
+              <div style={{ fontSize: 22, fontWeight: 700, fontFamily: 'var(--font-mono)' }}>{platformsWithData.length}/5</div>
+            </div>
           </div>
         </div>
       )}
 
-      {/* Loading */}
-      {loading && (
-        <div className="empty-state">Memuat data KPI...</div>
-      )}
+      {loading && <div className="empty-state">Memuat data KPI...</div>}
 
-      {/* Chart perbandingan */}
+      {/* Chart */}
       {!loading && chartData.length > 0 && (
         <div className="card" style={{ marginBottom: 24 }}>
           <div className="page-eyebrow" style={{ marginBottom: 12 }}>Perbandingan Platform</div>
-          <ResponsiveContainer width="100%" height={220}>
+          <ResponsiveContainer width="100%" height={200}>
             <BarChart data={chartData}>
               <CartesianGrid strokeDasharray="3 3" stroke="#F0DFD6" />
               <XAxis dataKey="name" fontSize={12} />
               <YAxis fontSize={12} />
               <Tooltip />
               <Bar dataKey="Views" name="Views">
-                {chartData.map((entry, i) => (
-                  <Cell key={i} fill={Object.values(PLATFORM_COLORS)[i % 5]} />
+                {chartData.map((_, i) => (
+                  <Cell key={i} fill={Object.values(PLATFORM_META).map(m => m.color)[i % 5]} />
                 ))}
               </Bar>
             </BarChart>
@@ -166,29 +251,22 @@ export default function KPI() {
         </div>
       )}
 
-      {/* Platform KPI Cards */}
-      {!loading && !kpiData && (
-        <div className="empty-state">Belum ada data untuk minggu ini.</div>
-      )}
-
+      {/* KPI per Platform */}
       {!loading && kpiData && (
-        <div className="page-eyebrow" style={{ marginBottom: 12 }}>Per Platform</div>
+        <>
+          <div className="page-eyebrow" style={{ marginBottom: 16 }}>KPI per Platform</div>
+          {PLATFORM_ORDER.map(p => {
+            const pData = kpiData.platforms.find(d => d.platform === p)
+            const meta = PLATFORM_META[p]
+            return <KpiRow key={p} data={pData} platformMeta={meta} />
+          })}
+        </>
       )}
-
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))', gap: 16 }}>
-        {/* Sort: platforms with data first, then platforms with no data */}
-        {PLATFORM_ORDER.map(p => {
-          const platformData = kpiData?.platforms?.find(d => d.platform === p)
-          if (!platformData) return null
-          return <PlatformCard key={p} data={platformData} />
-        })}
-      </div>
 
       {!loading && kpiData && platformsWithData.length === 0 && (
-        <div className="empty-state">Tidak ada data KPI untuk {week}. Input data di Monitoring dulu.</div>
+        <div className="empty-state">Belum ada data untuk {week}. Input data di Monitoring dulu.</div>
       )}
 
-      {/* Footer note connecting to Evaluation */}
       {!loading && kpiData && platformsWithData.length > 0 && (
         <div style={{ marginTop: 24, textAlign: 'center' }}>
           <button className="btn btn-primary" onClick={() => navigate('/evaluasi')}>
