@@ -90,7 +90,7 @@ CREATE TABLE IF NOT EXISTS kpi_metrics (
 
 -- Seed KPI metrics per platform
 INSERT INTO kpi_metrics (platform_id, metric_key, metric_label, unit, sort_order)
-SELECT p.id, m.* FROM platforms p, (VALUES
+SELECT p.id, m.metric_key, m.metric_label, m.unit, m.sort_order FROM platforms p, (VALUES
   ('instagram','reach','Reach','',1),
   ('instagram','impressions','Impressions','',2),
   ('instagram','likes','Likes','',3),
