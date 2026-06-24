@@ -3,7 +3,7 @@
   "provider": "node",
   "steps": {
     "install": {
-      "commands": ["cd frontend && npm ci"]
+      "commands": ["cd frontend && npm install"]
     },
     "build": {
       "inputs": [{ "step": "install" }],
