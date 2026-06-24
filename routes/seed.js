@@ -26,7 +26,7 @@ router.post('/seed-dummy', async (req, res) => {
       for (const [k, v] of Object.entries(t.m)) {
         await client.query(
           `INSERT INTO kpi_targets (platform_id, metric_key, month, year, target_value)
-           VALUES ($1, $2, 6, 2026, $3) ON CONFLICT DO UPDATE SET target_value = $3`,
+           VALUES ($1, $2, 6, 2026, $3) ON CONFLICT (platform_id, metric_key, month, year) DO UPDATE SET target_value = $3`,
           [pMap[t.slug], k, v]
         );
       }
@@ -44,7 +44,7 @@ router.post('/seed-dummy', async (req, res) => {
       for (const [k, v] of Object.entries(t.m)) {
         await client.query(
           `INSERT INTO kpi_targets (platform_id, metric_key, month, year, target_value)
-           VALUES ($1, $2, 7, 2026, $3) ON CONFLICT DO UPDATE SET target_value = $3`,
+           VALUES ($1, $2, 7, 2026, $3) ON CONFLICT (platform_id, metric_key, month, year) DO UPDATE SET target_value = $3`,
           [pMap[t.slug], k, v]
         );
       }
@@ -122,7 +122,7 @@ router.post('/seed-dummy', async (req, res) => {
         );
         for (const [k, v] of Object.entries(weeks[w])) {
           await client.query(
-            'INSERT INTO report_metrics (report_id, metric_key, value) VALUES ($1, $2, $3)',
+            'INSERT INTO report_metrics (report_id, metric_key, value) VALUES ($1, $2, $3) ON CONFLICT (report_id, metric_key) DO UPDATE SET value = $3',
             [r.rows[0].id, k, v]
           );
         }
