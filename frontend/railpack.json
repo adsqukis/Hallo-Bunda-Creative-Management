@@ -1,0 +1,17 @@
+{
+  "$schema": "https://schema.railpack.com",
+  "provider": "node",
+  "steps": {
+    "install": {
+      "commands": ["cd frontend && npm ci"]
+    },
+    "build": {
+      "inputs": [{ "step": "install" }],
+      "commands": ["cd frontend && npm run build"]
+    },
+    "deploy": {
+      "inputs": [{ "step": "build" }],
+      "commands": ["cd frontend && npx serve dist -l $PORT"]
+    }
+  }
+}
