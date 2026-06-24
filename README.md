@@ -5,16 +5,15 @@ Tool internal untuk monitoring, kalender konten (dengan AI brief generator), eva
 ## Struktur
 
 ```
-backend/    Express API + PostgreSQL + Auth (JWT)
+root/       Express API + PostgreSQL + Auth (JWT) — root level
 frontend/   React (Vite) + Recharts
 ```
 
 ## Setup Lokal
 
-### 1. Backend
+### 1. Backend (Root)
 
 ```bash
-cd backend
 npm install
 cp .env.example .env
 ```
@@ -49,16 +48,17 @@ Buka http://localhost:5173 — akan diarahkan ke halaman login. Masukkan `APP_PA
 
 ## Deploy ke Railway
 
-### Backend
-1. Buat project baru di Railway, connect ke repo GitHub ini, root directory `/backend`
-2. Add plugin **PostgreSQL** — Railway otomatis isi `DATABASE_URL`
-3. Buka tab PostgreSQL → Query, paste isi `backend/schema.sql`, jalankan sekali
-4. Di service backend, tambah environment variables:
+### Backend (Root Level)
+1. Buat project baru di Railway (atau gunakan yg sudah ada), connect ke repo GitHub ini
+2. Backend auto-terdeteksi karena `package.json` di root repo
+3. Add plugin **PostgreSQL** — Railway otomatis isi `DATABASE_URL`
+4. Buka tab PostgreSQL → Query, paste isi `schema.sql`, jalankan sekali
+5. Tambah environment variables:
    - `DEEPSEEK_API_KEY`
    - `JWT_SECRET` (random string, jangan dipakai ulang dari contoh)
    - `APP_PASSWORD` (password tim, ganti dari default)
    - `FRONTEND_URL` (isi setelah frontend deploy, untuk CORS)
-5. Railway auto-detect `npm start`
+6. Railway auto-detect `npm start`
 
 ### Frontend
 1. Buat service baru di project yang sama, root directory `/frontend`
