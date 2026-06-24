@@ -1,16 +1,16 @@
 import { NavLink, Routes, Route, Navigate } from 'react-router-dom'
-import Monitoring from './pages/Monitoring.jsx'
+import Overview from './pages/Overview.jsx'
+import InputLaporan from './pages/InputLaporan.jsx'
 import Calendar from './pages/Calendar.jsx'
-import Evaluation from './pages/Evaluation.jsx'
 import Requests from './pages/Requests.jsx'
 import KPI from './pages/KPI.jsx'
-import ManageUsers from './pages/ManageUsers.jsx'
+import Settings from './pages/Settings.jsx'
 import Login from './pages/Login.jsx'
 
 const NAV_ITEMS = [
-  { to: '/monitoring', label: 'Monitoring' },
+  { to: '/overview', label: 'Overview' },
+  { to: '/input-laporan', label: 'Input Laporan' },
   { to: '/kalender', label: 'Kalender Konten' },
-  { to: '/evaluasi', label: 'Evaluasi' },
   { to: '/permintaan', label: 'Permintaan Konten' },
 ]
 
@@ -25,7 +25,7 @@ function ProtectedShell() {
     <div className="app-shell">
       <aside className="sidebar">
         <div className="sidebar-brand">Hallo Bunda</div>
-        <div className="sidebar-sub">CONTENT OPS · WEEKLY INPUT</div>
+        <div className="sidebar-sub">CONTENT OPS</div>
         <nav className="sidebar-nav">
           {NAV_ITEMS.map(item => (
             <NavLink
@@ -48,11 +48,11 @@ function ProtectedShell() {
                 KPI
               </NavLink>
               <NavLink
-                to="/users"
+                to="/settings"
                 className={({ isActive }) => `sidebar-link${isActive ? ' active' : ''}`}
               >
                 <span className="sidebar-dot" style={{ opacity: 0.8 }} />
-                Manajemen User
+                Settings
               </NavLink>
             </>
           )}
@@ -70,13 +70,13 @@ function ProtectedShell() {
       </aside>
       <main className="main">
         <Routes>
-          <Route path="/" element={<Navigate to="/monitoring" replace />} />
-          <Route path="/monitoring" element={<Monitoring />} />
+          <Route path="/" element={<Navigate to="/overview" replace />} />
+          <Route path="/overview" element={<Overview />} />
+          <Route path="/input-laporan" element={<InputLaporan />} />
           <Route path="/kalender" element={<Calendar />} />
-          <Route path="/evaluasi" element={<Evaluation />} />
           <Route path="/permintaan" element={<Requests />} />
           {isAdmin && <Route path="/kpi" element={<KPI />} />}
-          {isAdmin && <Route path="/users" element={<ManageUsers />} />}
+          {isAdmin && <Route path="/settings" element={<Settings />} />}
         </Routes>
       </main>
     </div>

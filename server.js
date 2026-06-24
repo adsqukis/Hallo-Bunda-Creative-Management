@@ -9,6 +9,10 @@ import briefRouter from './routes/brief.js';
 import analyticsRouter from './routes/analytics.js';
 import authRouter from './routes/auth.js';
 import usersRouter from './routes/users.js';
+import platformsRouter from './routes/platforms.js';
+import targetsRouter from './routes/targets.js';
+import reportsRouter from './routes/reports.js';
+import overviewRouter from './routes/overview.js';
 import { requireAuth } from './middleware/auth.js';
 import { seedUsers } from './seed.js';
 
@@ -39,6 +43,10 @@ app.use('/api/requests', requireAuth, requestsRouter);
 app.use('/api/brief', requireAuth, briefRouter);
 app.use('/api/analytics', requireAuth, analyticsRouter);
 app.use('/api/users', usersRouter);
+app.use('/api/platforms', requireAuth, platformsRouter);
+app.use('/api/targets', requireAuth, targetsRouter);
+app.use('/api/reports', requireAuth, reportsRouter);
+app.use('/api/overview', requireAuth, overviewRouter);
 
 app.use((req, res) => {
   res.status(404).json({ error: 'Endpoint tidak ditemukan' });
