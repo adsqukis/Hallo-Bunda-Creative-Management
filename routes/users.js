@@ -60,6 +60,31 @@ router.post('/', async (req, res) => {
   }
 });
 
+// PATCH /api/users/:id/password — ganti password user
+router.patch('/:id/password', async (req, res) => {
+  const { id } = req.params;
+  const { password } = req.body;
+
+  if (!password || password.length < 6) {
+    return res.status(400).json({ error: 'Password minimal 6 karakter' });
+  }
+
+  try {
+    const target = await pool.query('SELECT id, username FROM users WHERE id = $1', [id]);
+    if (target.rows.length === 0) {
+      return res.status(404).json({ error: 'User tidak ditemukan' });
+    }
+
+    const hashed = await bcrypt.hash(password, 10);
+    await pool.query('UPDATE users SET password = $1, updated_at = NOW() WHERE id = $2', [hashed, id]);
+
+    res.json({ message: `Password ${target.rows[0].username} berhasil diubah` });
+  } catch (err) {
+    console.error('Change password error:', err);
+    res.status(500).json({ error: 'Gagal mengubah password' });
+  }
+});
+
 // DELETE /api/users/:id — hapus user
 router.delete('/:id', async (req, res) => {
   const { id } = req.params;

@@ -10,6 +10,11 @@ export default function ManageUsers() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
+  // Ganti password state
+  const [editPasswordId, setEditPasswordId] = useState(null)
+  const [newPassword, setNewPassword] = useState('')
+  const [pwLoading, setPwLoading] = useState(false)
+
   const currentUser = JSON.parse(localStorage.getItem('hb_user') || '{}')
 
   async function loadUsers() {
@@ -38,6 +43,24 @@ export default function ManageUsers() {
       setError(err.response?.data?.error || 'Gagal menambahkan user')
     } finally {
       setLoading(false)
+    }
+  }
+
+  async function handleChangePassword(id) {
+    if (!newPassword || newPassword.length < 6) {
+      alert('Password minimal 6 karakter')
+      return
+    }
+    setPwLoading(true)
+    try {
+      await api.patch(`/users/${id}/password`, { password: newPassword })
+      setEditPasswordId(null)
+      setNewPassword('')
+      alert('Password berhasil diubah')
+    } catch (err) {
+      alert(err.response?.data?.error || 'Gagal mengubah password')
+    } finally {
+      setPwLoading(false)
     }
   }
 
@@ -131,14 +154,53 @@ export default function ManageUsers() {
                   {new Date(u.created_at).toLocaleDateString('id-ID', { day: 'numeric', month: 'short', year: 'numeric' })}
                 </td>
                 <td>
-                  {u.username !== currentUser.username && (
+                  <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap', alignItems: 'center' }}>
                     <button
                       className="btn"
-                      style={{ borderColor: '#FCA5A5', color: '#DC2626', fontSize: 12, padding: '4px 10px' }}
-                      onClick={() => handleDelete(u.id, u.username)}
+                      style={{ fontSize: 12, padding: '4px 10px' }}
+                      onClick={() => {
+                        setEditPasswordId(editPasswordId === u.id ? null : u.id)
+                        setNewPassword('')
+                      }}
                     >
-                      Hapus
+                      Ganti Password
                     </button>
+                    {u.username !== currentUser.username && (
+                      <button
+                        className="btn"
+                        style={{ borderColor: '#FCA5A5', color: '#DC2626', fontSize: 12, padding: '4px 10px' }}
+                        onClick={() => handleDelete(u.id, u.username)}
+                      >
+                        Hapus
+                      </button>
+                    )}
+                  </div>
+                  {editPasswordId === u.id && (
+                    <div style={{ marginTop: 8, display: 'flex', gap: 6, alignItems: 'center' }}>
+                      <input
+                        type="password"
+                        value={newPassword}
+                        onChange={e => setNewPassword(e.target.value)}
+                        placeholder="Password baru (min 6)"
+                        style={{ width: 160, fontSize: 13, padding: '6px 10px' }}
+                        autoFocus
+                      />
+                      <button
+                        className="btn btn-primary"
+                        style={{ fontSize: 12, padding: '6px 12px' }}
+                        disabled={pwLoading}
+                        onClick={() => handleChangePassword(u.id)}
+                      >
+                        {pwLoading ? '...' : 'Simpan'}
+                      </button>
+                      <button
+                        className="btn"
+                        style={{ fontSize: 12, padding: '6px 12px' }}
+                        onClick={() => { setEditPasswordId(null); setNewPassword('') }}
+                      >
+                        Batal
+                      </button>
+                    </div>
                   )}
                 </td>
               </tr>
