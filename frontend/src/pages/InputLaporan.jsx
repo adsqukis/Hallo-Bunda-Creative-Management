@@ -13,6 +13,7 @@ export default function InputLaporan() {
   const [success, setSuccess] = useState('')
   const [error, setError] = useState('')
   const [recentReports, setRecentReports] = useState([])
+  const [reportsFilter, setReportsFilter] = useState({ from: '', to: '' })
 
   useEffect(() => {
     api.get('/platforms').then(res => {
@@ -24,18 +25,24 @@ export default function InputLaporan() {
     }).catch(() => setError('Gagal memuat platform'))
   }, [])
 
+  function loadReports() {
+    const params = { platform: selectedPlatform }
+    if (reportsFilter.from) params.from = reportsFilter.from
+    if (reportsFilter.to) params.to = reportsFilter.to
+    if (!reportsFilter.from && !reportsFilter.to) params.limit = 5
+    api.get('/reports', { params })
+      .then(res => setRecentReports(res.data))
+      .catch(() => {})
+  }
+
   useEffect(() => {
     if (!selectedPlatform) return
     const p = platforms.find(pl => pl.slug === selectedPlatform)
     setMetrics(p?.metrics || [])
     setFormValues({})
     setTopContents([{ title: '', metric_key: '', metric_value: '' }])
-
-    // Load recent reports for this platform
-    api.get('/reports', { params: { platform: selectedPlatform, limit: 5 } })
-      .then(res => setRecentReports(res.data))
-      .catch(() => {})
-  }, [selectedPlatform, platforms])
+    loadReports()
+  }, [selectedPlatform, platforms, reportsFilter.from, reportsFilter.to])
 
   function handleChange(key, value) {
     setFormValues(prev => ({ ...prev, [key]: value }))
@@ -201,8 +208,16 @@ export default function InputLaporan() {
       {/* Recent reports */}
       {recentReports.length > 0 && (
         <div className="card" style={{ padding: 0 }}>
-          <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)' }}>
-            <div className="page-eyebrow">Laporan Terakhir</div>
+          <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)', display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 8 }}>
+            <div className="page-eyebrow" style={{ marginBottom: 0 }}>Histori Laporan</div>
+            <div className="date-filter" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <input type="date" value={reportsFilter.from} onChange={e => setReportsFilter(p => ({ ...p, from: e.target.value }))} style={{ width: 140, fontSize: 12, padding: '4px 8px' }} placeholder="Dari" />
+              <span style={{ color: 'var(--muted)', fontSize: 12 }}>–</span>
+              <input type="date" value={reportsFilter.to} onChange={e => setReportsFilter(p => ({ ...p, to: e.target.value }))} style={{ width: 140, fontSize: 12, padding: '4px 8px' }} placeholder="Sampai" />
+              {(reportsFilter.from || reportsFilter.to) && (
+                <button className="btn" style={{ fontSize: 11, padding: '4px 8px' }} onClick={() => setReportsFilter({ from: '', to: '' })}>Reset</button>
+              )}
+            </div>
           </div>
           <div className="table-wrap"><table>
             <thead>

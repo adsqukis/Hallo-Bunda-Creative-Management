@@ -3,17 +3,25 @@ import pool from '../db.js';
 
 const router = express.Router();
 
-// GET semua konten kalender, filter by bulan opsional
-// /api/calendar?month=2026-06
+// GET semua konten kalender, filter by bulan atau range tanggal
+// /api/calendar?month=2026-06&from=2026-06-01&to=2026-06-30
 router.get('/', async (req, res) => {
   try {
-    const { month, platform, status } = req.query;
+    const { month, from, to, platform, status } = req.query;
     let query = 'SELECT * FROM calendar_content WHERE 1=1';
     const params = [];
 
     if (month) {
       params.push(`${month}%`);
       query += ` AND TO_CHAR(scheduled_date, 'YYYY-MM') = $${params.length}`;
+    }
+    if (from) {
+      params.push(from);
+      query += ` AND scheduled_date >= $${params.length}`;
+    }
+    if (to) {
+      params.push(to);
+      query += ` AND scheduled_date <= $${params.length}`;
     }
     if (platform) {
       params.push(platform);

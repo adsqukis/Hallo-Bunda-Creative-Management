@@ -24,6 +24,7 @@ export default function Calendar() {
   const [form, setForm] = useState(emptyForm)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [dateFilter, setDateFilter] = useState({ from: '', to: '' })
 
   // AI brief generator state
   const [aiTopik, setAiTopik] = useState('')
@@ -35,7 +36,10 @@ export default function Calendar() {
   async function loadItems() {
     setLoading(true)
     try {
-      const res = await api.get('/calendar')
+      const params = {}
+      if (dateFilter.from) params.from = dateFilter.from
+      if (dateFilter.to) params.to = dateFilter.to
+      const res = await api.get('/calendar', { params })
       setItems(res.data)
     } catch (err) {
       setError('Gagal memuat kalender konten.')
@@ -44,7 +48,7 @@ export default function Calendar() {
     }
   }
 
-  useEffect(() => { loadItems() }, [])
+  useEffect(() => { loadItems() }, [dateFilter.from, dateFilter.to])
 
   function openForm() {
     setForm(emptyForm)
@@ -122,6 +126,16 @@ export default function Calendar() {
       </div>
 
       <div className="card">
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: 8, marginBottom: 16 }}>
+          <div className="date-filter" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+            <input type="date" value={dateFilter.from} onChange={e => setDateFilter(p => ({ ...p, from: e.target.value }))} style={{ width: 150, fontSize: 13, padding: '6px 10px' }} placeholder="Dari" />
+            <span style={{ color: 'var(--muted)' }}>–</span>
+            <input type="date" value={dateFilter.to} onChange={e => setDateFilter(p => ({ ...p, to: e.target.value }))} style={{ width: 150, fontSize: 13, padding: '6px 10px' }} placeholder="Sampai" />
+            {(dateFilter.from || dateFilter.to) && (
+              <button className="btn" style={{ fontSize: 12, padding: '5px 10px' }} onClick={() => setDateFilter({ from: '', to: '' })}>Reset</button>
+            )}
+          </div>
+        </div>
         {loading ? (
           <div className="empty-state">Memuat kalender...</div>
         ) : sorted.length === 0 ? (

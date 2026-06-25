@@ -3,10 +3,10 @@ import pool from '../db.js';
 
 const router = express.Router();
 
-// GET semua content requests, filter by status opsional
+// GET semua content requests, filter by status, date range, assigned_to
 router.get('/', async (req, res) => {
   try {
-    const { status, assigned_to } = req.query;
+    const { status, assigned_to, from, to } = req.query;
     let query = 'SELECT * FROM content_requests WHERE 1=1';
     const params = [];
 
@@ -17,6 +17,14 @@ router.get('/', async (req, res) => {
     if (assigned_to) {
       params.push(assigned_to);
       query += ` AND assigned_to = $${params.length}`;
+    }
+    if (from) {
+      params.push(from);
+      query += ` AND deadline >= $${params.length}`;
+    }
+    if (to) {
+      params.push(to);
+      query += ` AND deadline <= $${params.length}`;
     }
     query += ' ORDER BY deadline ASC NULLS LAST';
 

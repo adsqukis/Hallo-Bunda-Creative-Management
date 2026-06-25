@@ -25,11 +25,15 @@ export default function Requests() {
   const [editId, setEditId] = useState(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
+  const [dateFilter, setDateFilter] = useState({ from: '', to: '' })
 
   async function loadRequests() {
     setLoading(true)
     try {
-      const res = await api.get('/requests')
+      const params = {}
+      if (dateFilter.from) params.from = dateFilter.from
+      if (dateFilter.to) params.to = dateFilter.to
+      const res = await api.get('/requests', { params })
       setRequests(res.data)
     } catch (err) {
       setError('Gagal memuat data permintaan.')
@@ -38,7 +42,7 @@ export default function Requests() {
     }
   }
 
-  useEffect(() => { loadRequests() }, [])
+  useEffect(() => { loadRequests() }, [dateFilter.from, dateFilter.to])
 
   function openCreate() {
     setEditId(null)
@@ -119,7 +123,19 @@ export default function Requests() {
       {loading ? (
         <div className="card"><div className="empty-state">Memuat...</div></div>
       ) : (
-        <div className="kanban">
+        <>
+          <div className="card" style={{ marginBottom: 16, padding: '12px 16px' }}>
+            <div className="date-filter" style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+              <span style={{ fontSize: 12, color: 'var(--muted)', fontWeight: 600 }}>Filter Deadline:</span>
+              <input type="date" value={dateFilter.from} onChange={e => setDateFilter(p => ({ ...p, from: e.target.value }))} style={{ width: 150, fontSize: 13, padding: '6px 10px' }} placeholder="Dari" />
+              <span style={{ color: 'var(--muted)' }}>–</span>
+              <input type="date" value={dateFilter.to} onChange={e => setDateFilter(p => ({ ...p, to: e.target.value }))} style={{ width: 150, fontSize: 13, padding: '6px 10px' }} placeholder="Sampai" />
+              {(dateFilter.from || dateFilter.to) && (
+                <button className="btn" style={{ fontSize: 12, padding: '5px 10px' }} onClick={() => setDateFilter({ from: '', to: '' })}>Reset</button>
+              )}
+            </div>
+          </div>
+          <div className="kanban">
           {COLUMNS.map(col => {
             const colItems = requests.filter(r => r.status === col.key)
             return (
@@ -152,6 +168,7 @@ export default function Requests() {
             )
           })}
         </div>
+        </>
       )}
 
       {/* DETAIL MODAL */}
