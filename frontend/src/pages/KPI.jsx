@@ -78,7 +78,7 @@ export default function KPIPage() {
           <div className="page-eyebrow" style={{ marginBottom: 12 }}>
             Ringkasan · {MONTHS[month - 1]} {year}
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 12 }} className="kpi-summary">
             <div className="card" style={{ textAlign: 'center', padding: '16px 12px', background: '#F0FDF4' }}>
               <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted)', marginBottom: 4 }}>🟢 On Track</div>
               <div style={{ fontSize: 24, fontWeight: 700, color: '#16A34A', fontFamily: 'var(--font-mono)' }}>
@@ -139,7 +139,8 @@ export default function KPIPage() {
                 </div>
 
                 {/* Tabel metrik */}
-                <table>
+                <div className="table-wrap">
+                  <table>
                   <thead>
                     <tr>
                       <th style={{ width: '25%' }}>Metrik</th>
@@ -192,7 +193,7 @@ export default function KPIPage() {
                       )
                     })}
                   </tbody>
-                </table>
+                </table></div>
 
                 {/* Overall progress bar platform */}
                 {s.overall_percentage !== null && (

@@ -121,7 +121,7 @@ export default function InputLaporan() {
 
           <div style={{ marginBottom: 16 }}>
             <label style={{ marginBottom: 10 }}>Metrik KPI</label>
-            <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
+            <div className="metric-grid" style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: 10 }}>
               {metrics.map(m => (
                 <div key={m.metric_key} className="field" style={{ marginBottom: 0 }}>
                   <label style={{ fontSize: 11 }}>{m.metric_label} {m.unit && <span style={{ color: 'var(--muted)' }}>({m.unit})</span>}</label>
@@ -204,7 +204,7 @@ export default function InputLaporan() {
           <div style={{ padding: '14px 20px', borderBottom: '1px solid var(--border)' }}>
             <div className="page-eyebrow">Laporan Terakhir</div>
           </div>
-          <table>
+          <div className="table-wrap"><table>
             <thead>
               <tr>
                 <th>Tanggal</th>
@@ -229,7 +229,7 @@ export default function InputLaporan() {
                 )
               })}
             </tbody>
-          </table>
+          </table></div>
         </div>
       )}
     </div>

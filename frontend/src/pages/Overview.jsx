@@ -108,22 +108,22 @@ export default function Overview() {
       {/* AKUMULASI — card besar di atas */}
       <div className="card" style={{ marginBottom: 24, padding: '24px 28px', borderLeft: '4px solid var(--accent)' }}>
         <div className="page-eyebrow" style={{ marginBottom: 12 }}>Akumulasi Semua Platform · {from} s.d {to}</div>
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
+        <div className="acc-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(4, 1fr)', gap: 16 }}>
           <div>
             <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase' }}>Total Views/Traffic</div>
-            <div style={{ fontSize: 28, fontWeight: 700, fontFamily: 'var(--font-mono)', marginTop: 4 }}>{totalViews.toLocaleString('id-ID')}</div>
+            <div className="acc-value" style={{ fontSize: 28, fontWeight: 700, fontFamily: 'var(--font-mono)', marginTop: 4 }}>{totalViews.toLocaleString('id-ID')}</div>
           </div>
           <div>
             <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase' }}>Total Engagement</div>
-            <div style={{ fontSize: 28, fontWeight: 700, fontFamily: 'var(--font-mono)', marginTop: 4 }}>{totalEngagement.toLocaleString('id-ID')}</div>
+            <div className="acc-value" style={{ fontSize: 28, fontWeight: 700, fontFamily: 'var(--font-mono)', marginTop: 4 }}>{totalEngagement.toLocaleString('id-ID')}</div>
           </div>
           <div>
             <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase' }}>Laporan Masuk</div>
-            <div style={{ fontSize: 28, fontWeight: 700, fontFamily: 'var(--font-mono)', marginTop: 4 }}>{data?.accumulation?.total_reports || 0}</div>
+            <div className="acc-value" style={{ fontSize: 28, fontWeight: 700, fontFamily: 'var(--font-mono)', marginTop: 4 }}>{data?.accumulation?.total_reports || 0}</div>
           </div>
           <div>
             <div style={{ fontSize: 11, fontWeight: 600, color: 'var(--muted)', textTransform: 'uppercase' }}>Platform Aktif</div>
-            <div style={{ fontSize: 28, fontWeight: 700, fontFamily: 'var(--font-mono)', marginTop: 4 }}>{data?.accumulation?.active_platforms || 0}/5</div>
+            <div className="acc-value" style={{ fontSize: 28, fontWeight: 700, fontFamily: 'var(--font-mono)', marginTop: 4 }}>{data?.accumulation?.active_platforms || 0}/5</div>
           </div>
         </div>
       </div>
@@ -132,7 +132,7 @@ export default function Overview() {
 
       {/* Per-platform cards */}
       {!loading && data && (
-        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16, marginBottom: 24 }}>
+        <div className="platform-grid" style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', gap: 16, marginBottom: 24 }}>
           {data.platforms.filter(p => p.report_count > 0).map(p => {
             const m = p.metrics || {}
             const mKeys = Object.keys(m)
@@ -210,7 +210,8 @@ export default function Overview() {
           <div style={{ padding: '16px 20px', borderBottom: '1px solid var(--border)' }}>
             <div className="page-eyebrow">Top 5 Content</div>
           </div>
-          <table>
+          <div className="table-wrap">
+            <table>
             <thead>
               <tr>
                 <th>#</th>

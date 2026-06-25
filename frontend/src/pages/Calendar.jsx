@@ -127,7 +127,7 @@ export default function Calendar() {
         ) : sorted.length === 0 ? (
           <div className="empty-state">Belum ada konten direncanakan. Buat konten pertama dan generate brief dengan AI.</div>
         ) : (
-          <table>
+          <div className="table-wrap"><table>
             <thead>
               <tr>
                 <th>Tanggal</th>
@@ -158,7 +158,7 @@ export default function Calendar() {
                 </tr>
               ))}
             </tbody>
-          </table>
+          </table></div>
         )}
       </div>
 

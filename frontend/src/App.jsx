@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { NavLink, Routes, Route, Navigate } from 'react-router-dom'
 import Overview from './pages/Overview.jsx'
 import InputLaporan from './pages/InputLaporan.jsx'
@@ -15,23 +16,40 @@ const NAV_ITEMS = [
 ]
 
 function ProtectedShell() {
+  const [sidebarOpen, setSidebarOpen] = useState(false)
   const isAuthed = !!localStorage.getItem('hb_token')
   if (!isAuthed) return <Navigate to="/login" replace />
 
   const hbUser = JSON.parse(localStorage.getItem('hb_user') || '{}')
   const isAdmin = hbUser.role === 'admin'
 
+  function closeSidebar() {
+    setSidebarOpen(false)
+  }
+
   return (
     <div className="app-shell">
-      <aside className="sidebar">
-        <div className="sidebar-brand">Hallo Bunda</div>
-        <div className="sidebar-sub">CONTENT OPS</div>
+      {/* Mobile overlay */}
+      {sidebarOpen && <div className="sidebar-overlay" onClick={closeSidebar} />}
+
+      <aside className={`sidebar${sidebarOpen ? ' open' : ''}`}>
+        <div className="sidebar-header">
+          <div>
+            <div className="sidebar-brand">Hallo Bunda</div>
+            <div className="sidebar-sub">CONTENT OPS</div>
+          </div>
+          <button className="sidebar-close" onClick={closeSidebar} aria-label="Tutup menu">
+            ✕
+          </button>
+        </div>
         <nav className="sidebar-nav">
           {NAV_ITEMS.map(item => (
             <NavLink
               key={item.to}
               to={item.to}
+              end
               className={({ isActive }) => `sidebar-link${isActive ? ' active' : ''}`}
+              onClick={closeSidebar}
             >
               <span className="sidebar-dot" />
               {item.label}
@@ -43,6 +61,7 @@ function ProtectedShell() {
                 to="/kpi"
                 className={({ isActive }) => `sidebar-link${isActive ? ' active' : ''}`}
                 style={{ marginTop: 16, borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 16 }}
+                onClick={closeSidebar}
               >
                 <span className="sidebar-dot" style={{ opacity: 0.8 }} />
                 KPI
@@ -50,6 +69,7 @@ function ProtectedShell() {
               <NavLink
                 to="/settings"
                 className={({ isActive }) => `sidebar-link${isActive ? ' active' : ''}`}
+                onClick={closeSidebar}
               >
                 <span className="sidebar-dot" style={{ opacity: 0.8 }} />
                 Settings
@@ -57,18 +77,25 @@ function ProtectedShell() {
             </>
           )}
         </nav>
-        <div style={{ marginTop: 'auto', fontSize: 11, color: '#8A887F', marginBottom: 8, fontFamily: 'IBM Plex Mono, monospace' }}>
-          {hbUser.username || ''}
+        <div className="sidebar-footer">
+          <span className="sidebar-user">{hbUser.username || ''}</span>
+          <button
+            className="btn"
+            style={{ background: 'transparent', color: '#C9C6BB', borderColor: 'rgba(255,255,255,0.15)', width: '100%', marginTop: 8 }}
+            onClick={() => { localStorage.removeItem('hb_token'); localStorage.removeItem('hb_user'); window.location.href = '/login' }}
+          >
+            Keluar
+          </button>
         </div>
-        <button
-          className="btn"
-          style={{ background: 'transparent', color: '#C9C6BB', borderColor: 'rgba(255,255,255,0.15)' }}
-          onClick={() => { localStorage.removeItem('hb_token'); localStorage.removeItem('hb_user'); window.location.href = '/login' }}
-        >
-          Keluar
-        </button>
       </aside>
       <main className="main">
+        {/* Mobile top bar */}
+        <div className="mobile-topbar">
+          <button className="hamburger" onClick={() => setSidebarOpen(true)} aria-label="Buka menu">
+            <span /><span /><span />
+          </button>
+          <span className="mobile-brand">Hallo Bunda</span>
+        </div>
         <Routes>
           <Route path="/" element={<Navigate to="/overview" replace />} />
           <Route path="/overview" element={<Overview />} />

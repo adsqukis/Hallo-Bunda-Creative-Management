@@ -132,7 +132,7 @@ function PlatformManager() {
         <button type="submit" className="btn btn-primary" style={{ fontSize: 12 }}>Tambah</button>
       </form>
 
-      <table>
+      <div className="table-wrap"><table>
         <thead><tr><th>Icon</th><th>Nama</th><th>Slug</th><th>Metrik</th><th></th></tr></thead>
         <tbody>
           {platforms.map(p => (
@@ -145,7 +145,7 @@ function PlatformManager() {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
     </div>
   )
 }
@@ -206,7 +206,7 @@ function UserManager() {
         </div>
       )}
 
-      <table>
+      <div className="table-wrap"><table>
         <thead><tr><th>Username</th><th>Role</th><th>Dibuat</th><th></th></tr></thead>
         <tbody>
           {users.map(u => (
@@ -231,7 +231,7 @@ function UserManager() {
             </tr>
           ))}
         </tbody>
-      </table>
+      </table></div>
     </div>
   )
 }
