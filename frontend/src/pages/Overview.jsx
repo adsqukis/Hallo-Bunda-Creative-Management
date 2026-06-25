@@ -233,6 +233,7 @@ export default function Overview() {
               ))}
             </tbody>
           </table>
+          </div>
         </div>
       )}
 
