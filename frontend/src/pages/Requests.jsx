@@ -3,7 +3,8 @@ import { api } from '../api/client.js'
 
 const emptyForm = {
   title: '', type: 'design', description: '',
-  requested_by: '', assigned_to: '', deadline: '', priority: 'medium'
+  requested_by: '', assigned_to: '', deadline: '', priority: 'medium',
+  reference_link: '', result_link: '', notes: ''
 }
 
 const COLUMNS = [
@@ -13,12 +14,15 @@ const COLUMNS = [
 ]
 
 const TYPE_LABEL = { design: 'Design', video: 'Video', artikel: 'Artikel', lainnya: 'Lainnya' }
+const PRIORITY_LABEL = { high: 'High', medium: 'Medium', low: 'Low' }
 
 export default function Requests() {
   const [requests, setRequests] = useState([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const [showDetail, setShowDetail] = useState(null)
   const [form, setForm] = useState(emptyForm)
+  const [editId, setEditId] = useState(null)
   const [saving, setSaving] = useState(false)
   const [error, setError] = useState('')
 
@@ -36,14 +40,48 @@ export default function Requests() {
 
   useEffect(() => { loadRequests() }, [])
 
+  function openCreate() {
+    setEditId(null)
+    setForm(emptyForm)
+    setShowForm(true)
+  }
+
+  function openEdit(r) {
+    setEditId(r.id)
+    setForm({
+      title: r.title || '',
+      type: r.type || 'design',
+      description: r.description || '',
+      requested_by: r.requested_by || '',
+      assigned_to: r.assigned_to || '',
+      deadline: r.deadline ? r.deadline.slice(0, 10) : '',
+      priority: r.priority || 'medium',
+      reference_link: r.reference_link || '',
+      result_link: r.result_link || '',
+      notes: r.notes || ''
+    })
+    setShowForm(true)
+  }
+
   async function handleSubmit(e) {
     e.preventDefault()
     setSaving(true)
     setError('')
     try {
-      await api.post('/requests', { ...form, deadline: form.deadline || null })
-      setForm(emptyForm)
+      const payload = {
+        ...form,
+        deadline: form.deadline || null,
+        reference_link: form.reference_link || null,
+        result_link: form.result_link || null,
+        notes: form.notes || null
+      }
+      if (editId) {
+        await api.put(`/requests/${editId}`, payload)
+      } else {
+        await api.post('/requests', payload)
+      }
       setShowForm(false)
+      setShowDetail(null)
       loadRequests()
     } catch (err) {
       setError(err.response?.data?.error || 'Gagal menyimpan permintaan')
@@ -60,7 +98,12 @@ export default function Requests() {
   async function handleDelete(id) {
     if (!confirm('Hapus permintaan ini?')) return
     await api.delete(`/requests/${id}`)
+    setShowDetail(null)
     loadRequests()
+  }
+
+  function openDetail(r) {
+    setShowDetail(r)
   }
 
   return (
@@ -70,7 +113,7 @@ export default function Requests() {
           <div className="page-eyebrow">Design & Video Requests</div>
           <h1 className="page-title">Permintaan Konten</h1>
         </div>
-        <button className="btn btn-primary" onClick={() => setShowForm(true)}>+ Buat Permintaan</button>
+        <button className="btn btn-primary" onClick={openCreate}>+ Buat Permintaan</button>
       </div>
 
       {loading ? (
@@ -87,20 +130,21 @@ export default function Requests() {
                     <div className="empty-state" style={{ padding: 8, fontSize: 12 }}>Kosong</div>
                   </div>
                 ) : colItems.map(r => (
-                  <div key={r.id} className="kanban-card">
+                  <div key={r.id} className="kanban-card" onClick={() => openDetail(r)} style={{ cursor: 'pointer' }}>
                     <div className="kanban-card-title">{r.title}</div>
                     <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 6 }}>
-                      {TYPE_LABEL[r.type]} · <span className={`priority-${r.priority}`}>{r.priority}</span>
+                      {TYPE_LABEL[r.type]} · <span className={`priority-${r.priority}`}>{PRIORITY_LABEL[r.priority]}</span>
                     </div>
                     {r.deadline && <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 6 }}>Deadline: {r.deadline.slice(0, 10)}</div>}
                     {r.assigned_to && <div style={{ fontSize: 12, marginBottom: 8 }}>PIC: {r.assigned_to}</div>}
-                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }}>
+                    {r.description && <div style={{ fontSize: 12, color: 'var(--muted)', marginBottom: 8, lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{r.description}</div>}
+                    <div style={{ display: 'flex', gap: 6, flexWrap: 'wrap' }} onClick={e => e.stopPropagation()}>
                       {COLUMNS.filter(c => c.key !== r.status).map(c => (
                         <button key={c.key} className="btn" style={{ fontSize: 11, padding: '4px 8px' }} onClick={() => moveStatus(r.id, c.key)}>
                           → {c.label}
                         </button>
                       ))}
-                      <button className="btn" style={{ fontSize: 11, padding: '4px 8px' }} onClick={() => handleDelete(r.id)}>Hapus</button>
+                      <button className="btn" style={{ fontSize: 11, padding: '4px 8px', color: '#B91C1C' }} onClick={() => handleDelete(r.id)}>Hapus</button>
                     </div>
                   </div>
                 ))}
@@ -110,10 +154,85 @@ export default function Requests() {
         </div>
       )}
 
+      {/* DETAIL MODAL */}
+      {showDetail && (
+        <div className="modal-overlay" onClick={() => setShowDetail(null)}>
+          <div className="modal" onClick={e => e.stopPropagation()} style={{ maxWidth: 520 }}>
+            <div className="modal-title">{showDetail.title}</div>
+
+            <div className="detail-grid">
+              <div className="detail-field">
+                <span className="detail-label">Tipe</span>
+                <span className="detail-value">{TYPE_LABEL[showDetail.type] || showDetail.type}</span>
+              </div>
+              <div className="detail-field">
+                <span className="detail-label">Priority</span>
+                <span className={`priority-${showDetail.priority}`} style={{ fontWeight: 600 }}>{PRIORITY_LABEL[showDetail.priority]}</span>
+              </div>
+              <div className="detail-field">
+                <span className="detail-label">Status</span>
+                <span style={{ fontWeight: 600 }}>{showDetail.status === 'done' ? '✅ Done' : showDetail.status === 'in_progress' ? '🔄 In Progress' : '⏳ Pending'}</span>
+              </div>
+              <div className="detail-field">
+                <span className="detail-label">Deadline</span>
+                <span>{showDetail.deadline ? showDetail.deadline.slice(0, 10) : '-'}</span>
+              </div>
+              <div className="detail-field">
+                <span className="detail-label">Diminta oleh</span>
+                <span>{showDetail.requested_by || '-'}</span>
+              </div>
+              <div className="detail-field">
+                <span className="detail-label">PIC</span>
+                <span>{showDetail.assigned_to || '-'}</span>
+              </div>
+            </div>
+
+            {showDetail.description && (
+              <div className="detail-section">
+                <div className="detail-label">Brief / Deskripsi</div>
+                <div className="detail-text">{showDetail.description}</div>
+              </div>
+            )}
+
+            {showDetail.reference_link && (
+              <div className="detail-section">
+                <div className="detail-label">Link Referensi</div>
+                <a href={showDetail.reference_link} target="_blank" rel="noopener noreferrer" className="detail-link">{showDetail.reference_link}</a>
+              </div>
+            )}
+
+            {showDetail.result_link && (
+              <div className="detail-section">
+                <div className="detail-label">Link Hasil Konten</div>
+                <a href={showDetail.result_link} target="_blank" rel="noopener noreferrer" className="detail-link">{showDetail.result_link}</a>
+              </div>
+            )}
+
+            {showDetail.notes && (
+              <div className="detail-section">
+                <div className="detail-label">Catatan</div>
+                <div className="detail-text">{showDetail.notes}</div>
+              </div>
+            )}
+
+            <div className="modal-actions" style={{ justifyContent: 'space-between' }}>
+              <div>
+                <button className="btn" onClick={() => handleDelete(showDetail.id)} style={{ color: '#B91C1C' }}>Hapus</button>
+              </div>
+              <div style={{ display: 'flex', gap: 10 }}>
+                <button className="btn" onClick={() => { setShowDetail(null); openEdit(showDetail) }}>Edit</button>
+                <button className="btn btn-primary" onClick={() => setShowDetail(null)}>Tutup</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* CREATE/EDIT FORM MODAL */}
       {showForm && (
         <div className="modal-overlay" onClick={() => setShowForm(false)}>
           <form className="modal" onClick={e => e.stopPropagation()} onSubmit={handleSubmit}>
-            <div className="modal-title">Buat Permintaan Konten</div>
+            <div className="modal-title">{editId ? 'Edit Permintaan' : 'Buat Permintaan Konten'}</div>
 
             {error && <div style={{ color: '#B91C1C', fontSize: 13, marginBottom: 12 }}>{error}</div>}
 
@@ -144,6 +263,11 @@ export default function Requests() {
               <textarea rows={3} value={form.description} onChange={e => setForm({ ...form, description: e.target.value })} placeholder="Detail apa yang dibutuhkan" />
             </div>
 
+            <div className="field">
+              <label>Link Referensi</label>
+              <input type="url" value={form.reference_link} onChange={e => setForm({ ...form, reference_link: e.target.value })} placeholder="https://..." />
+            </div>
+
             <div className="grid-cols" style={{ gridTemplateColumns: '1fr 1fr', gap: 12 }}>
               <div className="field">
                 <label>Diminta oleh</label>
@@ -155,14 +279,25 @@ export default function Requests() {
               </div>
             </div>
 
+            <div className="grid-cols" style={{ gridTemplateColumns: '1fr 1fr', gap: 12 }}>
+              <div className="field">
+                <label>Deadline</label>
+                <input type="date" value={form.deadline} onChange={e => setForm({ ...form, deadline: e.target.value })} />
+              </div>
+              <div className="field">
+                <label>Link Hasil Konten</label>
+                <input type="url" value={form.result_link} onChange={e => setForm({ ...form, result_link: e.target.value })} placeholder="https://..." />
+              </div>
+            </div>
+
             <div className="field">
-              <label>Deadline</label>
-              <input type="date" value={form.deadline} onChange={e => setForm({ ...form, deadline: e.target.value })} />
+              <label>Catatan</label>
+              <textarea rows={2} value={form.notes} onChange={e => setForm({ ...form, notes: e.target.value })} placeholder="Catatan tambahan..." />
             </div>
 
             <div className="modal-actions">
               <button type="button" className="btn" onClick={() => setShowForm(false)}>Batal</button>
-              <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Menyimpan...' : 'Simpan'}</button>
+              <button type="submit" className="btn btn-primary" disabled={saving}>{saving ? 'Menyimpan...' : editId ? 'Simpan Perubahan' : 'Simpan'}</button>
             </div>
           </form>
         </div>

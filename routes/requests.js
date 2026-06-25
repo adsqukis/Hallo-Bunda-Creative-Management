@@ -33,7 +33,7 @@ router.post('/', async (req, res) => {
   try {
     const {
       title, type, description, requested_by, assigned_to,
-      deadline, priority
+      deadline, priority, reference_link, result_link, notes
     } = req.body;
 
     if (!title || !type) {
@@ -42,10 +42,10 @@ router.post('/', async (req, res) => {
 
     const result = await pool.query(
       `INSERT INTO content_requests
-        (title, type, description, requested_by, assigned_to, deadline, priority)
-       VALUES ($1,$2,$3,$4,$5,$6,$7)
+        (title, type, description, requested_by, assigned_to, deadline, priority, reference_link, result_link, notes)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10)
        RETURNING *`,
-      [title, type, description, requested_by, assigned_to, deadline, priority || 'medium']
+      [title, type, description, requested_by, assigned_to, deadline, priority || 'medium', reference_link, result_link, notes]
     );
     res.status(201).json(result.rows[0]);
   } catch (err) {
@@ -58,7 +58,7 @@ router.post('/', async (req, res) => {
 router.put('/:id', async (req, res) => {
   try {
     const { id } = req.params;
-    const { title, description, assigned_to, deadline, priority, status } = req.body;
+    const { title, description, assigned_to, deadline, priority, status, reference_link, result_link, notes } = req.body;
 
     const result = await pool.query(
       `UPDATE content_requests SET
@@ -68,10 +68,13 @@ router.put('/:id', async (req, res) => {
         deadline = COALESCE($4, deadline),
         priority = COALESCE($5, priority),
         status = COALESCE($6, status),
+        reference_link = COALESCE($7, reference_link),
+        result_link = COALESCE($8, result_link),
+        notes = COALESCE($9, notes),
         updated_at = NOW()
-       WHERE id = $7
+       WHERE id = $10
        RETURNING *`,
-      [title, description, assigned_to, deadline, priority, status, id]
+      [title, description, assigned_to, deadline, priority, status, reference_link, result_link, notes, id]
     );
 
     if (result.rows.length === 0) {

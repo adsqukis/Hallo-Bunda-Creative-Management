@@ -346,6 +346,51 @@ tr:last-child td { border-bottom: none; }
 .priority-medium { color: var(--warn); }
 .priority-low { color: var(--good); }
 
+/* ===== DETAIL MODAL ===== */
+.detail-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+.detail-field {
+  background: var(--paper);
+  border-radius: 8px;
+  padding: 10px 12px;
+}
+.detail-label {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--muted);
+  display: block;
+  margin-bottom: 4px;
+  font-family: var(--font-mono);
+}
+.detail-value {
+  font-size: 14px;
+  font-weight: 500;
+}
+.detail-section {
+  margin-bottom: 14px;
+}
+.detail-text {
+  font-size: 13px;
+  line-height: 1.6;
+  color: var(--ink);
+  white-space: pre-wrap;
+}
+.detail-link {
+  font-size: 13px;
+  color: var(--accent);
+  word-break: break-all;
+  display: inline-block;
+}
+@media (max-width: 768px) {
+  .detail-grid { grid-template-columns: 1fr; }
+}
+
 /* ===== RESPONSIVE: TABLET (max 1024px) ===== */
 @media (max-width: 1024px) {
   .main { padding: 28px 24px; }
