@@ -6,6 +6,7 @@ import Calendar from './pages/Calendar.jsx'
 import Requests from './pages/Requests.jsx'
 import KPI from './pages/KPI.jsx'
 import Settings from './pages/Settings.jsx'
+import Guide from './pages/Guide.jsx'
 import Login from './pages/Login.jsx'
 
 const NAV_ITEMS = [
@@ -98,6 +99,16 @@ function ProtectedShell() {
             </>
           )}
         </nav>
+        <nav className="sidebar-nav sidebar-nav-footer">
+          <NavLink
+            to="/panduan"
+            className={({ isActive }) => `sidebar-link${isActive ? ' active' : ''}`}
+            onClick={closeSidebar}
+          >
+            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" style={{ flexShrink: 0 }}><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+            Penggunaan
+          </NavLink>
+        </nav>
         <div className="sidebar-footer">
           <span className="sidebar-user">{hbUser.username || ''}</span>
           <button
@@ -125,6 +136,7 @@ function ProtectedShell() {
           <Route path="/permintaan" element={<Requests />} />
           {isAdmin && <Route path="/kpi" element={<KPI />} />}
           {isAdmin && <Route path="/settings" element={<Settings />} />}
+          <Route path="/panduan" element={<Guide />} />
         </Routes>
       </main>
     </div>
